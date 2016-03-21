@@ -85,13 +85,12 @@ init([]) ->
 %%                          remove_handler
 %% @end
 %%--------------------------------------------------------------------
-handle_event(_Event, State) ->
-    {ok, State}.
 
 handle_event({book_new_cargo,Origin,Destination}, State) ->
+	{cargo_aggregate:create(Origin,Destination), State};
+
+handle_event(_Event, State) ->
     {ok, State}.
-
-
 
 %%--------------------------------------------------------------------
 %% @private

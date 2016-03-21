@@ -20,7 +20,7 @@
 
 %% API functions
 -export([start_link/0]).
-
+-export([create/2]).
 %% gen_server callbacks
 -export([init/1,
          handle_call/3,
@@ -29,7 +29,18 @@
          terminate/2,
          code_change/3]).
 
--record(state, {}).
+-record(route_specification,{
+	  origin = "" :: string(),
+	  destination = "" :: string()
+	 }
+       ).
+
+-record(state, {
+	  id = 0 :: non_neg_integer(),
+	  route_specification = #route_specification{},
+	  changes=[] :: list()
+	 }
+       ).
 
 %%%===================================================================
 %%% API functions
@@ -44,6 +55,11 @@
 %%--------------------------------------------------------------------
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+create(Origin,Destination) ->
+	gen_server:call(?MODULE,{create,Origin,Destination}).
+
+
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -77,6 +93,15 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+
+handle_call({create,Origin,Destination},_From,_State) ->
+	{reply,
+	 ok,
+	 #state{
+		 route_specification=#route_specification{origin=Origin,destination=Destination}
+		}
+	};
+
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
