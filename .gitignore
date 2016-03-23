@@ -1,3 +1,5 @@
 *.swp
 *.d
 *.swo
+.erlang.mk/*
+.rebar/*
