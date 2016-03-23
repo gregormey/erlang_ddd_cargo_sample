@@ -20,7 +20,9 @@
 
 %% API functions
 -export([start_link/0]).
--export([create/2]).
+-export([create/3]).
+-export([process_unsaved_changes/2]).
+
 %% gen_server callbacks
 -export([init/1,
          handle_call/3,
@@ -30,17 +32,16 @@
          code_change/3]).
 
 -record(route_specification,{
-	  origin = "" :: string(),
-	  destination = "" :: string()
-	 }
-       ).
+	origin = "" :: string(),
+	destination = "" :: string()
+}).
 
 -record(state, {
-	  id = 0 :: non_neg_integer(),
-	  route_specification = #route_specification{},
-	  changes=[] :: list()
-	 }
-       ).
+	id = "" :: string(),
+	route_specification = #route_specification{},
+	date_created :: tuple(),
+	changes=[] :: list()
+}).
 
 %%%===================================================================
 %%% API functions
@@ -56,9 +57,11 @@
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-create(Origin,Destination) ->
-	gen_server:call(?MODULE,{create,Origin,Destination}).
+create(Pid,Origin,Destination) ->
+	gen_server:call(Pid,{create,Origin,Destination}).
 
+process_unsaved_changes(Pid, Saver)->
+	gen_server:call(Pid,{process_unsaved_changes,Saver}).
 
 
 %%%===================================================================
@@ -94,12 +97,16 @@ init([]) ->
 %% @end
 %%--------------------------------------------------------------------
 
-handle_call({create,Origin,Destination},_From,_State) ->
-	{reply,
-	 ok,
-	 #state{
-		 route_specification=#route_specification{origin=Origin,destination=Destination}
-		}
+handle_call({create,Origin,Destination},_From,State) ->
+	{reply,ok,
+	 apply_new_event({cargo_created,Origin,Destination, erlang:localtime()}, State)
+	};
+
+handle_call({process_unsaved_changes, Saver},_From,State) ->
+	Id = State#state.id,
+	Saver(Id, lists:reverse(State#state.changes)),
+	{reply,ok,
+	 State#state{changes=[]}
 	};
 
 handle_call(_Request, _From, State) ->
@@ -160,3 +167,17 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+apply_new_event(Event, State) ->
+	NewState = apply_event(Event, State),
+	CombinedChanges = [Event] ++ NewState#state.changes,
+	NewState#state{changes=CombinedChanges}.
+
+
+apply_event({cargo_created, Origin,Destination,DateCreated}, State) ->
+	State#state{
+		id=cargo_repository:generate_tracking_id(), 
+		date_created = DateCreated, 
+		route_specification=#route_specification{origin=Origin,destination=Destination}
+		}.
+
