@@ -18,6 +18,7 @@
 
 -export([save/1]).
 -export([generate_tracking_id/0]).
+-export([load_by_tracking_id/1]).
 
 generate_tracking_id()->
 	uuid:to_string(uuid:uuid5(oid, "tracking_id")).
@@ -25,4 +26,7 @@ generate_tracking_id()->
 save(Pid) ->
 	Saver = fun(Id, Events) -> event_store:append_events(Id, Events) end,
 	cargo_aggregate:process_unsaved_changes(Pid, Saver).
+
+load_by_tracking_id(Tracking_Id) ->
+	read_store:load_cargo_by_tracking_id(Tracking_Id). 
 
