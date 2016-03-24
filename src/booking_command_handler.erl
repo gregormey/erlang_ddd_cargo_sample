@@ -20,7 +20,8 @@
 
 %% API functions
 -export([start_link/0,
-         add_handler/2]).
+         add_handler/2,
+         delete_handler/0]).
 
 %% gen_event callbacks
 -export([init/1,
@@ -54,8 +55,11 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 add_handler(Handler, Args) ->
-    gen_event:add_handler(?MODULE, Handler, Args).
+    event_manager:add_handler(?MODULE, []).
+    
 
+delete_handler() ->
+    event_manager:delete_handler(?MODULE, []).
 %%%===================================================================
 %%% gen_event callbacks
 %%%===================================================================
