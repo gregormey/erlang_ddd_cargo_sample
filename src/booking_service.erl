@@ -16,10 +16,15 @@
 -module(booking_service).
 
 -export([book_new_cargo/2, 
-		load_cargo_for_routing/1]).
+		load_cargo_for_routing/1,
+		list_all_cargos/0]).
 
 book_new_cargo(Origin,Destination)->
 	event_manager:send_command({book_new_cargo, Origin,Destination}).
 
 load_cargo_for_routing(Tracking_Id)->
-	cargo_repository:load_cargo_by_tracking_id(Tracking_Id). 
+	cargo_read_store:load_cargo_by_tracking_id(Tracking_Id) . 
+
+list_all_cargos()->
+	cargo_read_store:all(). 	
+
