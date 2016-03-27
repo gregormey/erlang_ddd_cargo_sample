@@ -1,33 +1,61 @@
+
+%% Copyright (c) 2016, Gregor Meyenberg  <gregor@meyenberg.de>
+%% %%
+%% %% Permission to use, copy, modify, and/or distribute this software for any
+%% %% purpose with or without fee is hereby granted, provided that the above
+%% %% copyright notice and this permission notice appear in all copies.
+%% %%
+%% %% THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+%% %% WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+%% %% MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+%% %% ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+%% %% WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+%% %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+%% %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+%%
+
 -module(cargo_read_store).
 
 -record(route_specification,{
-	origin = "" :: string(),
-	destination = "" :: string()
+	origin = undefined :: string(),
+	destination = undefined :: string()
 }).
 
 -record(cargo, {
-	id = "" :: string(),
+	id = undefined :: string(),
 	route_specification = #route_specification{},
-	date_created :: tuple()
+	date_created = undefined:: tuple()
 }).
 
--export([init/0, 
-	load_cargo_by_tracking_id/0, 
-	add_cargo/1]).
+-opaque route_specification() :: #route_specification{}.
+-export_type([route_specification/0]).
 
-%% Using ets for the read store is fine for this demo, but the data 
-%% will be discarded when the creating process dies, and there is no
-%% automatic garbage collection for ets tables.
+-opaque cargo() :: #cargo{}.
+-export_type([cargo/0]).
+
+-export([init/0, 
+	load_cargo_by_tracking_id/1, 
+	add_cargo/4,
+	all/0]).
+
 
 init() ->
-    ets:new(read_store_summary_views, [public, named_table]),
-    set_counter_summary(#counter_summary{}),
-    ok.
+	case mnesia:create_table(cargo, [{attributes, record_info(fields, cargo)},{disc_copies,[node()]}]) of
+    	{atomic,ok} -> ok;
+    	{aborted,{already_exists,cargo}} -> already_exists
+    end.
 
-get_counter_summary() -> 
-	[{counter_summary, Summary}] = 
-		ets:lookup(read_store_summary_views, counter_summary),
-	Summary.
+add_cargo(Id,DateCreated,Origin,Destination) ->
+	mnesia_utile:store(#cargo{
+		id=Id, 
+		date_created = DateCreated, 
+		route_specification=#route_specification{origin=Origin,destination=Destination}
+	}). 
 
-set_counter_summary(NewData) -> 
-	ets:insert(read_store_summary_views, {counter_summary, NewData}).
+load_cargo_by_tracking_id(Tracking_Id) -> 
+	mnesia_utile:find_by_id(cargo, Tracking_Id).
+
+
+all() -> 
+	mnesia_utile:all(cargo).
+
