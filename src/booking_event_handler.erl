@@ -19,7 +19,7 @@
 
 %% API functions
 -export([start_link/0,
-         add_handler/2,
+         add_handler/0,
          delete_handler/0]).
 
 %% gen_event callbacks
@@ -50,10 +50,10 @@ start_link() ->
 %% @doc
 %% Adds an event handler
 %%
-%% @spec add_handler(Handler, Args) -> ok | {'EXIT', Reason} | term()
+%% @spec add_handler() -> ok | {'EXIT', Reason} | term()
 %% @end
 %%--------------------------------------------------------------------
-add_handler(Handler, Args) ->
+add_handler() ->
     event_manager:add_handler(?MODULE, []).
     
 
@@ -89,8 +89,8 @@ init([]) ->
 %% @end
 %%--------------------------------------------------------------------
 
-handle_event({cargo_created,Origin,Destination,DateCreated}, State) ->
-    
+handle_event({cargo_created,Id,Origin,Destination,DateCreated}, State) ->
+    cargo_read_store:add_cargo(Id,Origin,Destination,DateCreated), 
 	{ok, State};
 
 handle_event(_Event, State) ->
