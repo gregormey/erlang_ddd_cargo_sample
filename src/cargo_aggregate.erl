@@ -32,16 +32,23 @@
          code_change/3]).
 
 -record(route_specification,{
-	origin = "" :: string(),
-	destination = "" :: string()
+	origin = undefined :: string(),
+	destination = undefined :: string()
 }).
 
 -record(state, {
-	id = "" :: string(),
+	id = undefined :: string(),
 	route_specification = #route_specification{},
-	date_created :: tuple(),
+	date_created =undefined :: tuple(),
 	changes=[] :: list()
 }).
+
+-opaque route_specification() :: #route_specification{}.
+-export_type([route_specification/0]).
+
+-opaque state() :: #state{}.
+-export_type([state/0]).
+
 
 %%%===================================================================
 %%% API functions
@@ -179,5 +186,5 @@ apply_event({cargo_created, Origin,Destination,DateCreated}, State) ->
 		id=cargo_repository:generate_tracking_id(), 
 		date_created = DateCreated, 
 		route_specification=#route_specification{origin=Origin,destination=Destination}
-		}.
+	}.
 
