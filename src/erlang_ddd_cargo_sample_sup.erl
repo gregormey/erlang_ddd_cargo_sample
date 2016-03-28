@@ -22,5 +22,7 @@ start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-	Procs = [],
-	{ok, {{one_for_one, 1, 5}, Procs}}.
+	Event_manager = ?CHILD(event_manager, worker),
+	Children = [Event_manager],
+	RestartStrategy = {one_for_one, 10, 60},
+    {ok, {RestartStrategy, Children}}.
