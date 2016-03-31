@@ -13,32 +13,21 @@
 %% %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %%
 
--module(erlang_ddd_cargo_sample_app).
--behaviour(application).
+-module(cargo_sup).
+-behaviour(supervisor).
+ 
+-export([start_link/0]).
+-export([init/1]).
+ 
+start_link() ->
+	supervisor:start_link({local,?MODULE}, ?MODULE,[]).
+ 
 
--export([start/2]).
--export([stop/1]).
-
-start(_Type, _Args) ->
-	ensure_started(mnesia),
-	event_store:init(),
-    cargo_read_store:init(),
-    case erlang_ddd_cargo_sample_sup:start_link() of
-        {ok, Pid} ->
-            counter_command_handler:add_handler(),
-            counter_event_handler:add_handler(),
-            {ok, Pid};
-        Other ->
-            {error, Other}
-    end.
-
-stop(_State) ->
-	ok.
-
-ensure_started(App) ->
-    case application:start(App) of
-        ok ->
-            ok;
-        {error, {already_started, App}} ->
-            ok
-    end.
+init(_) ->
+{ok, {{one_for_one, 10, 60},
+	[{cargo_aggregate,
+		{cargo_aggregate, start_link, []},
+			transient, brutal_kill, worker, [cargo_aggregate]}
+	]
+	}	
+}.

@@ -87,7 +87,7 @@ process_unsaved_changes(Pid, Saver)->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}}.
+    {ok, #state{},45000}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -143,6 +143,9 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_info(timeout, State) ->
+	{stop, timeout, State};
+
 handle_info(_Info, State) ->
     {noreply, State}.
 
