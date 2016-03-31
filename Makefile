@@ -4,7 +4,7 @@ PROJECT_DESCRIPTION = Erlang DDD Cargo Sample
 PROJECT_VERSION = 0.0.1
 
 # Options.
-CT_OPTS += -pa test -ct_hooks mnesia_utile_ct_hook []
+CT_OPTS += -pa test -ct_hooks erlang_ddd_cargo_sample_ct_hook []
 
 # Depandancies
 DEPS = uuid mnesia_utile
