@@ -20,7 +20,17 @@
 -export([stop/1]).
 
 start(_Type, _Args) ->
-	erlang_ddd_cargo_sample_sup:start_link().
+	ensure_started(mnesia),
+	event_store:init(),
+    cargo_read_store:init(),
+    case erlang_ddd_cargo_sample_sup:start_link() of
+        {ok, Pid} ->
+            counter_command_handler:add_handler(),
+            counter_event_handler:add_handler(),
+            {ok, Pid};
+        Other ->
+            {error, Other}
+    end.
 
 stop(_State) ->
 	ok.
