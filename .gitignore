@@ -4,3 +4,4 @@
 .erlang.mk/*
 .rebar/*
 _rel/*
+relx
