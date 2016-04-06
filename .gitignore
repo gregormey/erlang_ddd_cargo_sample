@@ -3,3 +3,4 @@
 *.swo
 .erlang.mk/*
 .rebar/*
+_rel/*
