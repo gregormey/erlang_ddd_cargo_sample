@@ -5,3 +5,4 @@
 .rebar/*
 _rel/*
 relx
+logs

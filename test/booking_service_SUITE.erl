@@ -18,7 +18,17 @@
 -import(ct_helper, [doc/1]).
    
 
-all() -> [].
+all() -> [book_new_cargo, load_cargo_for_routing, list_all_cargos].
 
 init_per_suite(Config) ->
     Config.
+
+book_new_cargo(_)->
+	doc("Add a new cargo. And loads it from the read store"),
+	booking_service:book_new_cargo("Hamburg", "Hong Kong") .
+
+
+list_all_cargos(_)->
+	doc("List cargos").
+
+
