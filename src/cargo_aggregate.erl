@@ -62,7 +62,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link(?MODULE, [], []).
 
 create(Pid,Origin,Destination) ->
 	gen_server:call(Pid,{create,Origin,Destination}).
