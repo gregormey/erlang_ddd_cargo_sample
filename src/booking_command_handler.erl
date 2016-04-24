@@ -91,7 +91,7 @@ init([]) ->
 %%--------------------------------------------------------------------
 
 handle_event({book_new_cargo,Origin,Destination}, State) ->
-    {ok, Pid} = cargo_aggregate:start_link(),
+    {ok, Pid} = cargo_sup:start_link(),
     cargo_aggregate:create(Pid,Origin, Destination), 
     cargo_repository:save(Pid),
 	{ok, State};
