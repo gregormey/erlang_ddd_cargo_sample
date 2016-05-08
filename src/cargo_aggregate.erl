@@ -65,10 +65,10 @@ start_link() ->
     gen_server:start_link(?MODULE, [], []).
 
 create(Pid,Origin,Destination) ->
-	gen_server:call(Pid,{create,Origin,Destination}).
+	gen_server:call(get_child_pid(Pid),{create,Origin,Destination}).
 
 process_unsaved_changes(Pid, Saver)->
-	gen_server:call(Pid,{process_unsaved_changes,Saver}).
+	gen_server:call(get_child_pid(Pid),{process_unsaved_changes,Saver}).
 
 
 %%%===================================================================
@@ -190,4 +190,8 @@ apply_event({cargo_created, Origin,Destination,DateCreated}, State) ->
 		date_created = DateCreated, 
 		route_specification=#route_specification{origin=Origin,destination=Destination}
 	}.
+
+get_child_pid(ParentPid) ->
+	[{_,ChildPid,_,_}]=supervisor:which_children(ParentPid),
+	ChildPid.
 

@@ -25,7 +25,7 @@ init_per_suite(Config) ->
 
 book_new_cargo(_)->
 	doc("Add a new cargo. And loads it from the read store"),
-	ok=booking_service:book_new_cargo("Hamburg", "Hong Kong") .
+	ok=booking_service:book_new_cargo("Hamburg", "Hong Kong").
 
 
 list_all_cargos(_)->
