@@ -20,7 +20,12 @@
 		list_all_cargos/0]).
 
 book_new_cargo(Origin,Destination)->
-	event_manager:send_command({book_new_cargo, cargo_repository:generate_tracking_id(),Origin,Destination}).
+	Id=cargo_repository:generate_tracking_id(),
+	case event_manager:send_command({book_new_cargo, Id ,Origin,Destination}) of
+		ok -> Id;
+		Err -> Err
+	end.	
+
 
 load_cargo_for_routing(Tracking_Id)->
 	cargo_read_store:load_cargo_by_tracking_id(Tracking_Id) . 
