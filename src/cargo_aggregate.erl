@@ -20,7 +20,7 @@
 
 %% API functions
 -export([start_link/0]).
--export([create/3]).
+-export([create/4]).
 -export([process_unsaved_changes/2]).
 
 %% gen_server callbacks
@@ -64,8 +64,8 @@
 start_link() ->
     gen_server:start_link(?MODULE, [], []).
 
-create(Pid,Origin,Destination) ->
-	gen_server:call(get_child_pid(Pid),{create,Origin,Destination}).
+create(Pid,Id,Origin,Destination) ->
+	gen_server:call(get_child_pid(Pid),{create,Id,Origin,Destination}).
 
 process_unsaved_changes(Pid, Saver)->
 	gen_server:call(get_child_pid(Pid),{process_unsaved_changes,Saver}).
@@ -104,9 +104,9 @@ init([]) ->
 %% @end
 %%--------------------------------------------------------------------
 
-handle_call({create,Origin,Destination},_From,State) ->
+handle_call({create,Id,Origin,Destination},_From,State) ->
 	{reply,ok,
-	 apply_new_event({cargo_created,Origin,Destination, erlang:localtime()}, State)
+	 apply_new_event({cargo_created,Id,Origin,Destination,erlang:localtime()}, State)
 	};
 
 handle_call({process_unsaved_changes, Saver},_From,State) ->
@@ -184,9 +184,9 @@ apply_new_event(Event, State) ->
 	NewState#state{changes=CombinedChanges}.
 
 
-apply_event({cargo_created, Origin,Destination,DateCreated}, State) ->
+apply_event({cargo_created,Id,Origin,Destination,DateCreated}, State) ->
 	State#state{
-		id=cargo_repository:generate_tracking_id(), 
+		id=Id, 
 		date_created = DateCreated, 
 		route_specification=#route_specification{origin=Origin,destination=Destination}
 	}.
