@@ -25,10 +25,12 @@ init_per_suite(Config) ->
 
 book_new_cargo(_)->
 	doc("Add a new cargo. And loads it from the read store"),
-	ok=booking_service:book_new_cargo("Hamburg", "Hong Kong").
+	Id=booking_service:book_new_cargo("Hamburg", "Hong Kong"),
+	{cargo,Id,_,_}=booking_service:load_cargo_for_routing(Id).
 
 
 list_all_cargos(_)->
-	doc("List cargos").
+	doc("List cargos"),
+	[{cargo,Id,_,_}]=booking_service:list_all_cargos().
 
 
