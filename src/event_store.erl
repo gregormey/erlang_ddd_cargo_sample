@@ -15,29 +15,37 @@
 
 -module(event_store).
 
-
 -export([init/0,get_events/1,append_events/2, delete/1]).
--define(TABLE_ID, ?MODULE).
+
+-record(stream, {
+    id = undefined :: string(),
+    events=[] :: list()
+}).
+
+-opaque stream() :: #stream{}.
+-export_type([stream/0]).
 
 init() ->
-    ets:new(?TABLE_ID, [public, named_table]),
-    ok.
+    case mnesia:create_table(stream, [{attributes, record_info(fields, stream)},{disc_copies,[node()]}]) of
+        {atomic,ok} -> ok;
+        {aborted,{already_exists,stream}} -> already_exists
+    end.
 
-append_events(Key, Events) ->
-	StoredEvents = get_raw_events(Key),
+append_events(Id,Events) ->
+	StoredEvents = get_raw_events(Id),
 	NewEvents = lists:reverse(Events),
     CombinedEvents = NewEvents ++ StoredEvents,
-    ets:insert(?TABLE_ID, {Key, CombinedEvents}),
+    mnesia_utile:store(#stream{id=Id,events=CombinedEvents}),  
     lists:foreach(fun (Event) -> event_manager:publish_event(Event) end, NewEvents).
 
-get_events(Key) ->
-	lists:reverse(get_raw_events(Key)).
+get_events(Id) ->
+	lists:reverse(get_raw_events(Id)).
 
-delete(Key) ->
-    ets:delete(?TABLE_ID, Key).
+delete(Id) ->
+    mnesia_utile:remove(stream, Id). 
 
 get_raw_events(Key) ->
-    case ets:lookup(?TABLE_ID, Key) of
-        [{Key, Events}] -> Events;
-        [] -> []
+    case mnesia_utile:find_by_id(stream, Key)  of
+        #stream{events=Events} -> Events;
+        not_found -> []
     end.
