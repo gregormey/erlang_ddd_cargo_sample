@@ -18,19 +18,32 @@
 -import(ct_helper, [doc/1]).
    
 
-all() -> [book_new_cargo, list_all_cargos].
+all() -> [book_new_cargo, load_cargo, list_all_cargos].
 
-init_per_suite(Config) ->
-    Config.
+init_per_suite(_Config) ->
+    [{id,generate_tracking_id()}].
 
-book_new_cargo(_)->
-	doc("Add a new cargo. And loads it from the read store"),
-	Id=booking_service:book_new_cargo("Hamburg", "Hong Kong"),
-	{cargo,Id,_,_}=booking_service:load_cargo_for_routing(Id).
+book_new_cargo(Config)->
+	doc("Add a new cargo."),
+	Id=get_id_from_config(Config),
+	ok=booking_service:book_new_cargo(Id,"Hamburg", "Hong Kong").
 
+load_cargo(Config)->
+	doc("Load a specific cargo."),
+	Id=get_id_from_config(Config),
+	{cargo,Id,_,_}=booking_service:load_cargo_for_routing(Id). 
 
-list_all_cargos(_)->
+list_all_cargos(Config)->
 	doc("List cargos"),
+	Id=get_id_from_config(Config),
 	[{cargo,Id,_,_}]=booking_service:list_all_cargos().
+
+%%% internal
+get_id_from_config(Config)->
+	{id,Id}=lists:last(Config),
+	Id.
+
+generate_tracking_id()->
+	uuid:uuid_to_string(uuid:get_v4()).
 
 

@@ -15,16 +15,12 @@
 
 -module(booking_service).
 
--export([book_new_cargo/2, 
+-export([book_new_cargo/3, 
 		load_cargo_for_routing/1,
 		list_all_cargos/0]).
 
-book_new_cargo(Origin,Destination)->
-	Id=cargo_repository:generate_tracking_id(),
-	case event_manager:send_command({book_new_cargo, Id ,Origin,Destination}) of
-		ok -> Id;
-		Err -> Err
-	end.	
+book_new_cargo(Id,Origin,Destination)->
+	event_manager:send_command({book_new_cargo, Id ,Origin,Destination}).	
 
 
 load_cargo_for_routing(Tracking_Id)->

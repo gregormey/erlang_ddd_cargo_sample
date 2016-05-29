@@ -17,10 +17,6 @@
 -module(cargo_repository).
 
 -export([save/1]).
--export([generate_tracking_id/0]).
-
-generate_tracking_id()->
-	uuid:uuid_to_string(uuid:get_v4()).
 
 save(Pid) ->
 	Saver = fun(Id, Events) -> event_store:append_events(Id, Events) end,
