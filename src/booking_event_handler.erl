@@ -90,7 +90,7 @@ init([]) ->
 %%--------------------------------------------------------------------
 
 handle_event({cargo_created,Id,Origin,Destination,DateCreated}, State) ->
-    cargo_read_store:add_cargo(Id,Origin,Destination,DateCreated), 
+    cargo_projection:project_new_cargo(Id,Origin,Destination,DateCreated), 
 	{ok, State};
 
 handle_event(_Event, State) ->

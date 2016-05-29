@@ -24,8 +24,8 @@ book_new_cargo(Id,Origin,Destination)->
 
 
 load_cargo_for_routing(Tracking_Id)->
-	cargo_read_store:load_cargo_by_tracking_id(Tracking_Id) . 
+	read_store:load_by_id(cargo,Tracking_Id) . 
 
 list_all_cargos()->
-	cargo_read_store:all(). 	
+	read_store:all(cargo). 	
 

@@ -27,6 +27,7 @@ start_link() ->
 
 init([]) ->
 	Event_manager = ?CHILD(event_manager, worker),
-	Children = [Event_manager],
+	Cargo_projection = ?CHILD(cargo_projection, worker),
+	Children = [Event_manager,Cargo_projection],
 	RestartStrategy = {one_for_one, 10, 60},
     {ok, {RestartStrategy, Children}}.

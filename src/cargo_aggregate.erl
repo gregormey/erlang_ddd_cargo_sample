@@ -31,20 +31,10 @@
          terminate/2,
          code_change/3]).
 
--record(route_specification,{
-	origin = undefined :: string(),
-	destination = undefined :: string()
-}).
-
 -record(state, {
 	id = undefined :: string(),
-	route_specification = #route_specification{},
-	date_created =undefined :: tuple(),
 	changes=[] :: list()
 }).
-
--opaque route_specification() :: #route_specification{}.
--export_type([route_specification/0]).
 
 -opaque state() :: #state{}.
 -export_type([state/0]).
@@ -65,10 +55,10 @@ start_link() ->
     gen_server:start_link(?MODULE, [], []).
 
 create(Pid,Id,Origin,Destination) ->
-	gen_server:call(get_child_pid(Pid),{create,Id,Origin,Destination}).
+	gen_server:cast(get_child_pid(Pid),{create,Id,Origin,Destination}).
 
 process_unsaved_changes(Pid, Saver)->
-	gen_server:call(get_child_pid(Pid),{process_unsaved_changes,Saver}).
+	gen_server:cast(get_child_pid(Pid),{process_unsaved_changes,Saver}).
 
 
 %%%===================================================================
@@ -89,6 +79,8 @@ process_unsaved_changes(Pid, Saver)->
 init([]) ->
     {ok, #state{},45000}.
 
+
+
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
@@ -104,21 +96,9 @@ init([]) ->
 %% @end
 %%--------------------------------------------------------------------
 
-handle_call({create,Id,Origin,Destination},_From,State) ->
-	{reply,ok,
-	 apply_new_event({cargo_created,Id,Origin,Destination,erlang:localtime()}, State)
-	};
-
-handle_call({process_unsaved_changes, Saver},_From,State) ->
-	Id = State#state.id,
-	Saver(Id, lists:reverse(State#state.changes)),
-	{reply,ok,
-	 State#state{changes=[]}
-	};
-
 handle_call(_Request, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
+    {reply, ok, State}.
+
 
 %%--------------------------------------------------------------------
 %% @private
@@ -130,6 +110,21 @@ handle_call(_Request, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+
+handle_cast({create,Id,Origin,Destination},State) ->
+	{noreply,
+	 apply_new_event({cargo_created,Id,Origin,Destination,erlang:localtime()}, 
+	 					State#state{id=Id})
+	};
+
+handle_cast({process_unsaved_changes, Saver},State) ->
+	Id = State#state.id,
+	Saver(Id, lists:reverse(State#state.changes)),
+	{noreply,
+	 State#state{changes=[]}
+	};
+
+
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -179,17 +174,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 
 apply_new_event(Event, State) ->
-	NewState = apply_event(Event, State),
-	CombinedChanges = [Event] ++ NewState#state.changes,
-	NewState#state{changes=CombinedChanges}.
-
-
-apply_event({cargo_created,Id,Origin,Destination,DateCreated}, State) ->
-	State#state{
-		id=Id, 
-		date_created = DateCreated, 
-		route_specification=#route_specification{origin=Origin,destination=Destination}
-	}.
+	CombinedChanges = [Event] ++ State#state.changes,
+	State#state{changes=CombinedChanges}.
 
 get_child_pid(ParentPid) ->
 	[{_,ChildPid,_,_}]=supervisor:which_children(ParentPid),

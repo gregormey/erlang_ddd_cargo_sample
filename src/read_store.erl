@@ -14,7 +14,12 @@
 %% %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %%
 
--module(cargo_read_store).
+-module(read_store).
+
+-export([init/0, 
+	load_by_id/2, 
+	add/1,
+	all/1]).
 
 -record(route_specification,{
 	origin = undefined :: string(),
@@ -24,7 +29,7 @@
 -record(cargo, {
 	id = undefined :: string(),
 	route_specification = #route_specification{},
-	date_created = undefined:: tuple()
+	date_created =undefined :: tuple()
 }).
 
 -opaque route_specification() :: #route_specification{}.
@@ -33,11 +38,6 @@
 -opaque cargo() :: #cargo{}.
 -export_type([cargo/0]).
 
--export([init/0, 
-	load_cargo_by_tracking_id/1, 
-	add_cargo/4,
-	all/0]).
-
 
 init() ->
 	case mnesia:create_table(cargo, [{attributes, record_info(fields, cargo)},{disc_copies,[node()]}]) of
@@ -45,17 +45,20 @@ init() ->
     	{aborted,{already_exists,cargo}} -> already_exists
     end.
 
-add_cargo(Id,DateCreated,Origin,Destination) ->
-	mnesia_utile:store(#cargo{
-		id=Id, 
-		date_created = DateCreated, 
-		route_specification=#route_specification{origin=Origin,destination=Destination}
-	}). 
+add({cargo,Id,Origin,Destination,DateCreated}) ->
+	mnesia_utile:store(#cargo{id=Id,
+								route_specification=
+									#route_specification{
+										origin=Origin,
+										destination=Destination
+									},
+								date_created=DateCreated
+								}). 
 
-load_cargo_by_tracking_id(Tracking_Id) -> 
+load_by_id(cargo,Tracking_Id) -> 
 	mnesia_utile:find_by_id(cargo, Tracking_Id).
 
 
-all() -> 
+all(cargo) -> 
 	mnesia_utile:all(cargo).
 
