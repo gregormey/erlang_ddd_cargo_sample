@@ -19,13 +19,17 @@
 		load_cargo_for_routing/1,
 		list_all_cargos/0]).
 
+%% @doc sends command to book a new cargo
+-spec book_new_cargo(string(),string(),string())-> ok.
 book_new_cargo(Id,Origin,Destination)->
 	event_manager:send_command({book_new_cargo, Id ,Origin,Destination}).	
 
-
-load_cargo_for_routing(Tracking_Id)->
+%% @doc loads a cargo by it's tracking ID
+-spec load_cargo_for_routing(string())-> atom() | not_found.
+load_cargo_for_routing(Tracking_Id)-> 
 	read_store:load_by_id(cargo,Tracking_Id) . 
-
+%% @doc loads all cargos in the current state
+-spec list_all_cargos() -> list() | no_rows.
 list_all_cargos()->
 	read_store:all(cargo). 	
 
