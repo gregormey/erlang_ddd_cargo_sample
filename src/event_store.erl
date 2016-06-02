@@ -35,7 +35,7 @@ append_events(Id,Events) ->
 	StoredEvents = get_raw_events(Id),
 	NewEvents = lists:reverse(Events),
     CombinedEvents = NewEvents ++ StoredEvents,
-    mnesia_utile:store(#stream{id=Id,events=CombinedEvents}),  
+    ok=mnesia_utile:store(#stream{id=Id,events=CombinedEvents}),  
     lists:foreach(fun (Event) -> event_manager:publish_event(Event) end, NewEvents).
 
 get_events(Id) ->

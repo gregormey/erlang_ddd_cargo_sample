@@ -22,14 +22,14 @@
 	all/1]).
 
 -record(route_specification,{
-	origin = undefined :: string(),
-	destination = undefined :: string()
+	origin = undefined :: undefined | string(),
+	destination = undefined :: undefined |string()
 }).
 
 -record(cargo, {
-	id = undefined :: string(),
+	id = undefined :: undefined |string(),
 	route_specification = #route_specification{},
-	date_created =undefined :: tuple()
+	date_created =undefined :: undefined |tuple()
 }).
 
 -opaque route_specification() :: #route_specification{}.
@@ -46,7 +46,7 @@ init() ->
     end.
 
 add({cargo,Id,Origin,Destination,DateCreated}) ->
-	mnesia_utile:store(#cargo{id=Id,
+	ok=mnesia_utile:store(#cargo{id=Id,
 								route_specification=
 									#route_specification{
 										origin=Origin,

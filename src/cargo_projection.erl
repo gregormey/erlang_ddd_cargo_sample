@@ -43,7 +43,7 @@ handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 handle_cast({project_new_cargo, Id,Origin,Destination,DateCreated}, State) ->
-	read_store:add({cargo,Id,Origin,Destination,DateCreated}), 
+	ok=read_store:add({cargo,Id,Origin,Destination,DateCreated}), 
 	{noreply, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.

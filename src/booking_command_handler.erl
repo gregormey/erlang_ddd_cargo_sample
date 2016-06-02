@@ -32,6 +32,8 @@
          code_change/3]).
 
 -record(state, {}).
+-opaque state() :: #state{}.
+-export_type([state/0]).
 
 %%%===================================================================
 %%% API functions
@@ -39,18 +41,18 @@
 
 
 %% @doc Creates an event manager
--spec start_link() -> {ok, Pid} | {error, Error}.
+-spec start_link() -> {ok, pid()} | {error, term()}.
 start_link() ->
     gen_event:start_link({local, ?MODULE}).
 
 
 %% @doc Adds an event handler
--spec add_handler() -> ok | {'EXIT', Reason} | term().
+-spec add_handler() -> ok | {'EXIT', term()} | term().
 add_handler() ->
     event_manager:add_handler(?MODULE, []).
     
 %% @doc Removes an event handler
--spec delete_handler() -> ok | {'EXIT', Reason} | term()
+-spec delete_handler() -> ok | {'EXIT', term()} | term().
 delete_handler() ->
     event_manager:delete_handler(?MODULE, []).
 %%%===================================================================
@@ -60,12 +62,12 @@ delete_handler() ->
 %% @private
 %% @doc Whenever a new event handler is added to an event manager,
 %% this function is called to initialize the event handler.
--spec init(Args) -> {ok, State}.
+-spec init(list()) -> {ok, state()}.
 init([]) ->
     {ok, #state{}}.
 
 %% @private
--spec handle_event(Event, State) -> {ok, State} | {swap_handler, Args1, State1, Mod2, Args2} | remove_handler.
+-spec handle_event(term(), state()) -> {ok, state()} | 'remove_handler' | {'ok',_} | {'ok',_,'hibernate'} | {'swap_handler',_,_,atom() | {atom(),_},_}.
 %% @doc handel command to book a new cargo
 handle_event({book_new_cargo,Id,Origin,Destination}, State) ->
     {ok, Pid} = cargo_sup:start_link(),

@@ -32,7 +32,7 @@
          code_change/3]).
 
 -record(state, {
-	id = undefined :: string(),
+	id = undefined :: undefined | string(),
 	changes=[] :: list()
 }).
 
@@ -44,16 +44,13 @@
 %%% API functions
 %%%===================================================================
 
-%%--------------------------------------------------------------------
-%% @doc
-%% Starts the server
-%%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+%% @doc Starts the server
+-spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
     gen_server:start_link(?MODULE, [], []).
 
+%% @doc create a new cargo
+%%-spec create(string(),string(),string(),string()) -> 
 create(Pid,Id,Origin,Destination) ->
 	gen_server:cast(get_child_pid(Pid),{create,Id,Origin,Destination}).
 
