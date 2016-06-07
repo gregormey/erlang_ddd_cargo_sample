@@ -50,7 +50,7 @@ init() ->
 
 %% @doc
 %% add a cargo projection for read purpose
--spec add(tuble()) -> ok.
+-spec add(tuple()) -> ok.
 add({cargo,Id,Origin,Destination,DateCreated}) ->
 	ok=mnesia_utile:store(#cargo{id=Id,
 								route_specification=
@@ -63,13 +63,13 @@ add({cargo,Id,Origin,Destination,DateCreated}) ->
 
 %% @doc
 %% load a cargo from read store by id
--spec add(atom(),string()) -> tuple().
+-spec load_by_id(atom(),string()) -> tuple() | not_found.
 load_by_id(cargo,Tracking_Id) -> 
 	mnesia_utile:find_by_id(cargo, Tracking_Id).
 
 %% @doc
 %% load all cargos
--spec add(atom()) -> list().
+-spec all(atom()) -> no_rows | list().
 all(cargo) -> 
 	mnesia_utile:all(cargo).
 
