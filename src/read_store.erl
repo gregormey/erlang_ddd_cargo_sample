@@ -38,13 +38,19 @@
 -opaque cargo() :: #cargo{}.
 -export_type([cargo/0]).
 
-
+%% API
+%% @doc
+%% create tables for the read store
+-spec init() -> ok | already_exists.
 init() ->
 	case mnesia:create_table(cargo, [{attributes, record_info(fields, cargo)},{disc_copies,[node()]}]) of
     	{atomic,ok} -> ok;
     	{aborted,{already_exists,cargo}} -> already_exists
     end.
 
+%% @doc
+%% add a cargo projection for read purpose
+-spec add(tuble()) -> ok.
 add({cargo,Id,Origin,Destination,DateCreated}) ->
 	ok=mnesia_utile:store(#cargo{id=Id,
 								route_specification=
@@ -55,10 +61,15 @@ add({cargo,Id,Origin,Destination,DateCreated}) ->
 								date_created=DateCreated
 								}). 
 
+%% @doc
+%% load a cargo from read store by id
+-spec add(atom(),string()) -> tuple().
 load_by_id(cargo,Tracking_Id) -> 
 	mnesia_utile:find_by_id(cargo, Tracking_Id).
 
-
+%% @doc
+%% load all cargos
+-spec add(atom()) -> list().
 all(cargo) -> 
 	mnesia_utile:all(cargo).
 

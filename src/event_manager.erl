@@ -16,23 +16,28 @@
 -module(event_manager).
 
 %% The EventManager for our app
-
+%% API
 -export([start_link/0, add_handler/2, delete_handler/2, send_command/1,
 	publish_event/1]).
 -define(SERVER, ?MODULE).
 
 %% API functions
+-spec start_link() -> {ok, pid()} | ignore | {error,_}.
 start_link() ->
     gen_event:start_link({local, ?SERVER}).
 
+-spec add_handler(atom(),term())-> ok | {'EXIT',term()} | term().
 add_handler(Handler, Args) ->
     gen_event:add_handler(?SERVER, Handler, Args).
 
+-spec delete_handler(atom(),term())-> term() | {error,module_not_found} | {'EXIT',term()}.
 delete_handler(Handler, Args) ->
     gen_event:delete_handler(?SERVER, Handler, Args).
 
-send_command(Command) ->
+-spec send_command(tuple())-> ok.
+send_command(Command) -> 
 	gen_event:notify(?SERVER, Command).
 
+-spec publish_event(tuple())-> ok.
 publish_event(Event) ->
 	gen_event:notify(?SERVER, Event).

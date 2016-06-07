@@ -22,7 +22,7 @@
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 
 %% API
--spec start_link() -> {ok, pid()}.
+-spec start_link() -> {ok, pid()} | {error,_}.
 start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 

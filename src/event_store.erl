@@ -25,12 +25,18 @@
 -opaque stream() :: #stream{}.
 -export_type([stream/0]).
 
+%% API
+%% @doc
+%% create table for the event store
+-spec init() -> ok | already_exists.
 init() ->
     case mnesia:create_table(stream, [{attributes, record_info(fields, stream)},{disc_copies,[node()]}]) of
         {atomic,ok} -> ok;
         {aborted,{already_exists,stream}} -> already_exists
     end.
-
+%% @doc
+%% persists a new event on a aggregate and publishes the event
+-spec append_events(string(),list()) -> ok. 
 append_events(Id,Events) ->
 	StoredEvents = get_raw_events(Id),
 	NewEvents = lists:reverse(Events),
@@ -38,12 +44,19 @@ append_events(Id,Events) ->
     ok=mnesia_utile:store(#stream{id=Id,events=CombinedEvents}),  
     lists:foreach(fun (Event) -> event_manager:publish_event(Event) end, NewEvents).
 
+%% @doc
+%% returns all events for a aggregate identified by a ID
+-spec get_events(string()) -> list(). 
 get_events(Id) ->
 	lists:reverse(get_raw_events(Id)).
 
+%% @doc
+%% remove a events stream identified a aggregate id
+-spec delete(string()) -> ok. 
 delete(Id) ->
     mnesia_utile:remove(stream, Id). 
 
+%% Internals
 get_raw_events(Key) ->
     case mnesia_utile:find_by_id(stream, Key)  of
         #stream{events=Events} -> Events;
