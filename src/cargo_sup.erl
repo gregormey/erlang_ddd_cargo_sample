@@ -18,11 +18,13 @@
  
 -export([start_link/0]).
 -export([init/1]).
- 
+
+%% API
+-spec start_link() -> {ok, pid()}.
 start_link() ->
 	supervisor:start_link(?MODULE,[]).
  
-
+%% supervisor.
 init(_) ->
 {ok, {{one_for_one, 10, 60},
 	[{cargo_aggregate,

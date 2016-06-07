@@ -16,9 +16,11 @@
 -module(erlang_ddd_cargo_sample_app).
 -behaviour(application).
 
+%% API.
 -export([start/2]).
 -export([stop/1]).
 
+%% API.
 start(_Type, _Args) -> 
 	ensure_started(mnesia),
 	event_store:init(),
@@ -34,7 +36,10 @@ start(_Type, _Args) ->
 
 stop(_State) ->
 	ok.
-
+%% @private
+%% @doc
+%% start all required applications
+-spec ensure_started(atom()) -> ok.
 ensure_started(App) ->
     case application:start(App) of
         ok ->

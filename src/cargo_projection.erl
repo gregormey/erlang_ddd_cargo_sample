@@ -29,31 +29,37 @@
 
 
 %% API Function Definitions
+-spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+%% @doc
+%% creates the state of a created cargo as a read projection
+-spec project_new_cargo(string(),string(),string(),tuple())-> ok.
 project_new_cargo(Id,Origin,Destination,DateCreated) ->
 	gen_server:cast(?SERVER, {project_new_cargo, Id,Origin,Destination,DateCreated}).
 
 %% gen_server Function Definitions
+%% @private
 init(Args) ->
     {ok, Args}.
-
+%% @private
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
-
+%% @private
 handle_cast({project_new_cargo, Id,Origin,Destination,DateCreated}, State) ->
 	ok=read_store:add({cargo,Id,Origin,Destination,DateCreated}), 
 	{noreply, State};
+%% @private
 handle_cast(_Msg, State) ->
     {noreply, State}.
-
+%% @private
 handle_info(_Info, State) ->
     {noreply, State}.
-
+%% @private
 terminate(_Reason, _State) ->
     ok.
-
+%% @private
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 

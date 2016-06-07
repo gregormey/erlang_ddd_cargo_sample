@@ -21,10 +21,12 @@
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 
-
+%% API
+-spec start_link() -> {ok, pid()}.
 start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
+%% supervisor.
 init([]) ->
 	Event_manager = ?CHILD(event_manager, worker),
 	Cargo_projection = ?CHILD(cargo_projection, worker),

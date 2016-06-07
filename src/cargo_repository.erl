@@ -18,6 +18,9 @@
 
 -export([save/1]).
 
+%% @doc
+%% persists events on a aggregate idetified by its process ID
+-spec save(pid()) -> ok.
 save(Pid) ->
 	Saver = fun(Id, Events) -> event_store:append_events(Id, Events) end,
 	cargo_aggregate:process_unsaved_changes(Pid, Saver).
