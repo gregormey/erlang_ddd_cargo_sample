@@ -50,10 +50,11 @@ start_link() ->
     gen_server:start_link(?MODULE, [], []).
 
 %% @doc create a new cargo
-%%-spec create(string(),string(),string(),string()) -> 
+-spec create(pid(),string(),string(),string()) -> ok.
 create(Pid,Id,Origin,Destination) ->
 	gen_server:cast(get_child_pid(Pid),{create,Id,Origin,Destination}).
 
+-spec process_unsaved_changes(pid(),fun()) -> ok.
 process_unsaved_changes(Pid, Saver)->
 	gen_server:cast(get_child_pid(Pid),{process_unsaved_changes,Saver}).
 
@@ -66,13 +67,6 @@ process_unsaved_changes(Pid, Saver)->
 %% @private
 %% @doc
 %% Initializes the server
-%%
-%% @spec init(Args) -> {ok, State} |
-%%                     {ok, State, Timeout} |
-%%                     ignore |
-%%                     {stop, Reason}
-%% @end
-%%--------------------------------------------------------------------
 init([]) ->
     {ok, #state{},45000}.
 
@@ -82,17 +76,6 @@ init([]) ->
 %% @private
 %% @doc
 %% Handling call messages
-%%
-%% @spec handle_call(Request, From, State) ->
-%%                                   {reply, Reply, State} |
-%%                                   {reply, Reply, State, Timeout} |
-%%                                   {noreply, State} |
-%%                                   {noreply, State, Timeout} |
-%%                                   {stop, Reason, Reply, State} |
-%%                                   {stop, Reason, State}
-%% @end
-%%--------------------------------------------------------------------
-
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
@@ -101,19 +84,13 @@ handle_call(_Request, _From, State) ->
 %% @private
 %% @doc
 %% Handling cast messages
-%%
-%% @spec handle_cast(Msg, State) -> {noreply, State} |
-%%                                  {noreply, State, Timeout} |
-%%                                  {stop, Reason, State}
-%% @end
-%%--------------------------------------------------------------------
-
+% apply event cargo_created
 handle_cast({create,Id,Origin,Destination},State) ->
 	{noreply,
 	 apply_new_event({cargo_created,Id,Origin,Destination,erlang:localtime()}, 
 	 					State#state{id=Id})
 	};
-
+% persist changes
 handle_cast({process_unsaved_changes, Saver},State) ->
 	Id = State#state.id,
 	Saver(Id, lists:reverse(State#state.changes)),
@@ -127,14 +104,6 @@ handle_cast(_Msg, State) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc
-%% Handling all non call/cast messages
-%%
-%% @spec handle_info(Info, State) -> {noreply, State} |
-%%                                   {noreply, State, Timeout} |
-%%                                   {stop, Reason, State}
-%% @end
-%%--------------------------------------------------------------------
 handle_info(timeout, State) ->
 	{stop, timeout, State};
 
@@ -143,26 +112,11 @@ handle_info(_Info, State) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc
-%% This function is called by a gen_server when it is about to
-%% terminate. It should be the opposite of Module:init/1 and do any
-%% necessary cleaning up. When it returns, the gen_server terminates
-%% with Reason. The return value is ignored.
-%%
-%% @spec terminate(Reason, State) -> void()
-%% @end
-%%--------------------------------------------------------------------
 terminate(_Reason, _State) ->
     ok.
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc
-%% Convert process state when code is changed
-%%
-%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
-%% @end
-%%--------------------------------------------------------------------
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
@@ -170,10 +124,16 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
+%% @doc
+%% put a new event inc. payload to the list of changes of a conrete
+%% cargo aggregate
+-spec apply_new_event(tuple(), state())->state().
 apply_new_event(Event, State) ->
 	CombinedChanges = [Event] ++ State#state.changes,
 	State#state{changes=CombinedChanges}.
-
+%% @doc
+%% finds the pid of a cargo_aggregate process from its supervisor process
+-spec get_child_pid(pid()) -> pid().
 get_child_pid(ParentPid) ->
 	[{_,ChildPid,_,_}]=supervisor:which_children(ParentPid),
 	ChildPid.
