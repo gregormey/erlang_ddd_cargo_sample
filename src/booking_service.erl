@@ -17,7 +17,8 @@
 
 -export([book_new_cargo/3, 
 		load_cargo_for_routing/1,
-		list_all_cargos/0]).
+		list_all_cargos/0,
+		list_shipping_locations/0]).
 
 %% @doc sends command to book a new cargo
 -spec book_new_cargo(string(),string(),string())-> ok.
@@ -31,5 +32,11 @@ load_cargo_for_routing(Tracking_Id)->
 %% @doc loads all cargos in the current state
 -spec list_all_cargos() -> list() | no_rows.
 list_all_cargos()->
-	read_store:all(cargo). 	
+	read_store:all(cargo).
+
+%% @doc lists all possible locations for cargos routings from config
+-spec list_shipping_locations() -> list().
+list_shipping_locations() -> 
+	[].
+
 
