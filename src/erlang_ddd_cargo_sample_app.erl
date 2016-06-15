@@ -22,6 +22,7 @@
 
 %% API.
 start(_Type, _Args) -> 
+    mnesia:create_schema([node()]),
 	ensure_started(mnesia),
 	event_store:init(),
     read_store:init(),
