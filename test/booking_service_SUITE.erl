@@ -18,7 +18,7 @@
 -import(ct_helper, [doc/1]).
    
 
-all() -> [book_new_cargo, load_cargo, list_all_cargos].
+all() -> [book_new_cargo, load_cargo, list_all_cargos, list_shipping_locations].
 
 init_per_suite(_Config) ->
     [{id,generate_tracking_id()}].
@@ -37,6 +37,15 @@ list_all_cargos(Config)->
 	doc("List cargos"),
 	Id=get_id_from_config(Config),
 	[{cargo,Id,_,_}]=booking_service:list_all_cargos().
+
+list_shipping_locations(_Config)->
+	doc("It lists available shipping locations"),
+	Locations=booking_service:list_shipping_locations(),
+	true=is_list(Locations),
+	[{LocationCode,_}|_]=Locations,
+	5=string:len(LocationCode).
+
+
 
 %%% internal
 get_id_from_config(Config)->

@@ -34,9 +34,12 @@ load_cargo_for_routing(Tracking_Id)->
 list_all_cargos()->
 	read_store:all(cargo).
 
-%% @doc lists all possible locations for cargos routings from config
--spec list_shipping_locations() -> list().
+%% @doc lists all possible locations for cargos routings from priv/locations.config
+-spec list_shipping_locations() -> list() | no_shipping_locations.
 list_shipping_locations() -> 
-	[].
+	case file:consult(filename:join([code:priv_dir(erlang_ddd_cargo_sample), "locations.config"])) of 
+		{ok,[Locations]}->Locations;
+		 _ -> no_shipping_locations
+	end.
 
 
