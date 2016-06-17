@@ -22,7 +22,7 @@
 
 %% API.
 start(_Type, _Args) -> 
-    mnesia:create_schema([node()]),
+    ok=init_schema(),
 	ensure_started(mnesia),
 	event_store:init(),
     read_store:init(),
@@ -48,3 +48,11 @@ ensure_started(App) ->
         {error, {already_started, App}} ->
             ok
     end.
+
+%% @doc
+%% creates mnesia schema if not exists, if exists it ignores the error
+-spec init_schema() -> ok.
+init_schema()->
+    case mnesia:create_schema([node()]) of
+        _ -> ok
+    end. 
