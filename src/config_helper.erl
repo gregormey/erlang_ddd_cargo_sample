@@ -17,6 +17,8 @@
 
 -export([get_term_from_config_file/1]).
 
+%% @doc
+%% reads content of a config file and returns it as a erlang term
 -spec get_term_from_config_file(string()) -> {ok,term()} | {error, term()}.
 get_term_from_config_file(FileName) ->
 	file:consult(filename:join([code:priv_dir(erlang_ddd_cargo_sample), FileName])).
