@@ -45,8 +45,6 @@ list_shipping_locations(_Config)->
 	[{LocationCode,_}|_]=Locations,
 	5=string:len(LocationCode).
 
-
-
 %%% internal
 get_id_from_config(Config)->
 	{id,Id}=lists:last(Config),
