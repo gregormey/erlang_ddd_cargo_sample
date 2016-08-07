@@ -43,8 +43,8 @@ list_shipping_locations() ->
 		{error,_} -> no_shipping_locations
 	end.
 
-
 request_possible_routes_for_cargo(Tracking_Id) ->
-	[].
+	Cargo=read_store:load_by_id(cargo,Tracking_Id),
+	Itineraries=
 
 
