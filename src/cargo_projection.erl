@@ -48,7 +48,7 @@ handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 %% @private
 handle_cast({project_new_cargo, Id,Origin,Destination,DateCreated}, State) ->
-	ok=read_store:add({cargo,Id,Origin,Destination,DateCreated}), 
+	ok=cargo_read_store:add({Id,Origin,Destination,DateCreated}), 
 	{noreply, State};
 %% @private
 handle_cast(_Msg, State) ->

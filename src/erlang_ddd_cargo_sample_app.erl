@@ -25,7 +25,7 @@ start(_Type, _Args) ->
     ok=init_schema(),
 	ensure_started(mnesia),
 	event_store:init(),
-    read_store:init(),
+    cargo_read_store:init(),
     case erlang_ddd_cargo_sample_sup:start_link() of
         {ok, Pid} ->
             booking_command_handler:add_handler(),

@@ -29,11 +29,11 @@ book_new_cargo(Id,Origin,Destination)->
 %% @doc loads a cargo by it's tracking ID
 -spec load_cargo_for_routing(string())-> atom() | not_found.
 load_cargo_for_routing(Tracking_Id)-> 
-	read_store:load_by_id(cargo,Tracking_Id) . 
+	cargo_read_store:load_by_id(Tracking_Id) . 
 %% @doc loads all cargos in the current state
 -spec list_all_cargos() -> list() | no_rows.
 list_all_cargos()->
-	read_store:all(cargo).
+	cargo_read_store:all().
 
 %% @doc lists all possible locations for cargos routings from priv/locations.config
 -spec list_shipping_locations() -> list() | no_shipping_locations.
@@ -43,8 +43,12 @@ list_shipping_locations() ->
 		{error,_} -> no_shipping_locations
 	end.
 
+%% @doc lists all possible routes for a cargo
+-spec request_possible_routes_for_cargo(string()) -> list().
 request_possible_routes_for_cargo(Tracking_Id) ->
-	Cargo=read_store:load_by_id(cargo,Tracking_Id),
-	Itineraries=
+	Cargo=cargo_read_store:load_by_id(Tracking_Id),
+	Origin=cargo_read_store:route_specification_origin(Cargo), 
+	Destination=cargo_read_store:route_specification_destination(Cargo), 
+	graph_traversal_service:find_shortest_path(Origin, Destination). 
 
 

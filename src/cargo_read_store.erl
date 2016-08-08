@@ -14,12 +14,14 @@
 %% %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %%
 
--module(read_store).
+-module(cargo_read_store).
 
 -export([init/0, 
-	load_by_id/2, 
+	load_by_id/1, 
+	route_specification_origin/1,
+	route_specification_destination/1,
 	add/1,
-	all/1]).
+	all/0]).
 
 -record(route_specification,{
 	origin = undefined :: undefined | string(),
@@ -51,7 +53,7 @@ init() ->
 %% @doc
 %% add a cargo projection for read purpose
 -spec add(tuple()) -> ok.
-add({cargo,Id,Origin,Destination,DateCreated}) ->
+add({Id,Origin,Destination,DateCreated}) ->
 	ok=mnesia_utile:store(#cargo{id=Id,
 								route_specification=
 									#route_specification{
@@ -63,13 +65,26 @@ add({cargo,Id,Origin,Destination,DateCreated}) ->
 
 %% @doc
 %% load a cargo from read store by id
--spec load_by_id(atom(),string()) -> tuple() | not_found.
-load_by_id(cargo,Tracking_Id) -> 
+-spec load_by_id(string()) -> tuple() | not_found.
+load_by_id(Tracking_Id) -> 
 	mnesia_utile:find_by_id(cargo, Tracking_Id).
 
 %% @doc
+%% returns origin of a cargo route specification
+-spec route_specification_origin(cargo()) -> string() .
+route_specification_origin(#cargo{route_specification=RouteSpecification})->
+RouteSpecification#route_specification.origin.
+
+
+%% @doc
+%% returns destination of a cargo route specification
+-spec route_specification_destination(cargo()) -> string() .
+route_specification_destination(#cargo{route_specification=RouteSpecification})->
+RouteSpecification#route_specification.destination.
+
+%% @doc
 %% load all cargos
--spec all(atom()) -> no_rows | list().
-all(cargo) -> 
+-spec all() -> no_rows | list().
+all() -> 
 	mnesia_utile:all(cargo).
 
