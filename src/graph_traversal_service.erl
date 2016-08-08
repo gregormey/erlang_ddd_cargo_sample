@@ -63,12 +63,16 @@ route_to_transit_path(Route#route{origin=Origin,stops=[Stop|Stopps]})->
 -spec route_to_transit_path(list(),route())-> list().
 next_edge(Edges,Route#route{stops=[Stop|Stopps]})->
 	LastEdge=lists:last(Edges),
+	{ToDay,ToTime}=LastEdge#edge.toDate,
+	LoadDateTime={add_days(ToDay,1),random_time()},
 	{StopLocation,StopDuration}=Stop,
-	next_edge(Edges++[generate_edge(LastEdge#edge.toUnLocode,LastEdge#edge.toDate,StopLocation,StopDuration)],Route);
+	next_edge(Edges++[generate_edge(LastEdge#edge.toUnLocode,LoadDateTime,StopLocation,StopDuration)],Route);
 
 next_edge(Edges,Route#route{destination=Destination,duration=Duration,stops=[]}) ->
 	LastEdge=lists:last(Edges),
-	Edges++[generate_edge(LastEdge#edge.toUnLocode,LastEdge#edge.toDate,Destination,Duration)].
+	{ToDay,ToTime}=LastEdge#edge.toDate,
+	LoadDateTime={add_days(ToDay,1),random_time()},
+	Edges++[generate_edge(LastEdge#edge.toUnLocode,LoadDateTime,Destination,Duration)].
 
 %% @doc create a edge of a route by the given parameters
 -spec generate_edge(string(),tuple(),string(),number())-> edge().	
