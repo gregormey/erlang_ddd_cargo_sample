@@ -23,11 +23,25 @@
 	toDate =undefined :: undefined |tuple()
 }).
 
+-record(route, {
+	origin = undefined :: undefined |string(),
+	destination = undefined :: undefined |string(),
+	duration =undefined :: undefined |number(),
+	stopps =undefined :: undefined |list()
+}).
+
+-opaque route() :: #route{}.
+-export_type([route/0]).
+
+-opaque route() :: #route{}.
+-export_type([route/0]).
+
 
 %% @doc returms a list of all possible paths for the given locations
 -spec find_shortest_path(string(),string())-> list(). 
 find_shortest_path(FromUnLocode,ToUnLocode)->
 	Routes=filter_routes(FromUnLocode,ToUnLocode),
+	[route_to_transit_path(Route) || Route <-Routes ].
 
 
 %%%===================================================================
@@ -35,19 +49,31 @@ find_shortest_path(FromUnLocode,ToUnLocode)->
 %%%===================================================================
 
 %% @doc calculates the trsit path for a route
--spec route_to_transit_path(string(),string(),number(),list())-> list(). 
-route_to_transit_path(Origin,Destination,DestinationDuration,[])->
-	LoadDay=random_load_day(4),
-	LoadTime=random_time(),
-	[generate_edge(Origin,LoadDay,Destination,DestinationDuration)];
+-spec route_to_transit_path(route())-> list(). 
+route_to_transit_path(Route#route{origin=Origin,destination=Destination,duration=Duration,stops=[]})->
+	LoadDateTime={random_load_day(4),random_time()},
+	[generate_edge(Origin,LoadDateTime,Destination,Duration)];
 
-route_to_transit_path(Origin,Destination,DestinationDuration,Stopps)->
-	LoadDay=random_load_day(4),
-	LoadTime=random_time(),
-	
-generate_edges(CurrentLocation,NextLocation,Duration) 
+route_to_transit_path(Route#route{origin=Origin,stops=[Stop|Stopps]})->
+	LoadDateTime={random_load_day(4),random_time()},
+	{StopLocation,StopDuration}=Stop,
+	next_edge([generate_edge(Origin,LoadDateTime,StopLocation,StopDuration)],Route).
 
-generate_edge(FromUnLocode,LoadDay,ToUnLocode,DestinationDuration)->
+%% @doc calculates the trsit path to the next stop of a route
+-spec route_to_transit_path(list(),route())-> list().
+next_edge(Edges,Route#route{stops=[Stop|Stopps]})->
+	LastEdge=lists:last(Edges),
+	{StopLocation,StopDuration}=Stop,
+	next_edge(Edges++[generate_edge(LastEdge#edge.toUnLocode,LastEdge#edge.toDate,StopLocation,StopDuration)],Route);
+
+next_edge(Edges,Route#route{destination=Destination,duration=Duration,stops=[]}) ->
+	LastEdge=lists:last(Edges),
+	Edges++[generate_edge(LastEdge#edge.toUnLocode,LastEdge#edge.toDate,Destination,Duration)].
+
+%% @doc create a edge of a route by the given parameters
+-spec generate_edge(string(),tuple(),string(),number())-> edge().	
+generate_edge(FromUnLocode,LoadDateTime,ToUnLocode,DestinationDuration)->
+	{LoadDay,LoadTime}=LoadDateTime,
 	UnLoadDay=add_days(LoadDay,DestinationDuration),
 	UnLoadTime=random_time(),
 	#edge{fromUnLocode=FromUnLocode,
@@ -74,7 +100,7 @@ generate_edge(FromUnLocode,LoadDay,ToUnLocode,DestinationDuration)->
 -spec random_load_day(number())-> tuple(). 
 random_load_day(RanDays) ->
 	{Today,Time}=calendar:local_time(),
-	add_day(Today,random:uniform(4)).
+	add_day(Today,random:uniform(RanDays)).
 
 %% @doc adds a number of days to a date and returns a new one
 -spec add_days(tuple(),number())->tuple().
