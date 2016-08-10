@@ -133,6 +133,18 @@ has_route_origin_destination(#route{origin=RouteOrigin,destination=RouteDestinat
 -spec route_list()-> list() | no_routes. 
 route_list() -> 
 	case config_helper:get_term_from_config_file("itineraries.config") of 
-		{ok,[Routes]}->Routes;
+		{ok,[ConfigRoutes]}->[generate_route(ConfigRoute)||ConfigRoute<-ConfigRoutes];
 		{error,_} -> no_routes
 	end.
+
+%% @doc mapps a configured route to a roue record
+-spec generate_route(list())-> route().   
+generate_route(ConfigRoute)->
+	[
+        {origin, Origin},
+        {destination,Destination},
+        {duration, Duration},
+        {stopps,Stopps}
+    ] = ConfigRoute,
+    #route{origin=Origin,destination=Destination,duration=Duration,stopps=Stopps}.
+
