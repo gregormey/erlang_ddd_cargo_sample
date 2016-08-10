@@ -6,5 +6,5 @@
 _rel/*
 relx
 logs
-test
+*.beam
 *.plt
