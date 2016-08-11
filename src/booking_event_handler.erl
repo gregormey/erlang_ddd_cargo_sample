@@ -69,6 +69,10 @@ init([]) ->
 handle_event({cargo_created,Id,Origin,Destination,DateCreated}, State) ->
     cargo_projection:project_new_cargo(Id,Origin,Destination,DateCreated), 
 	{ok, State};
+%% @doc handel event when a route was assigned to a cargo. Projects current state of cargo.
+handle_event({route_assigned_to_cargo,Id,Legs}, State) ->
+    cargo_projection:project_route_to_cargo(Id,Legs), 
+    {ok, State};
 
 %% @private
 handle_event(_Event, State) ->

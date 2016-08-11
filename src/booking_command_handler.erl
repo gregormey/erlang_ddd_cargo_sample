@@ -76,6 +76,16 @@ handle_event({book_new_cargo,Id,Origin,Destination}, State) ->
 	{ok, State};
 
 %% @private
+-spec handle_event(term(), state()) -> {ok, state()} | 'remove_handler' | {'ok',_} | {'ok',_,'hibernate'} | {'swap_handler',_,_,atom() | {atom(),_},_}.
+%% @doc handel command to book a new cargo
+handle_event({assign_route_to_cargo,Id,Legs}, State) ->
+    {ok, Pid} = cargo_sup:start_link(),
+    cargo_aggregate:assign_to_route(Pid,Id,Legs), 
+    cargo_repository:save(Pid),
+    {ok, State};
+
+
+%% @private
 handle_event(_Event, State) ->
     {ok, State}.
 

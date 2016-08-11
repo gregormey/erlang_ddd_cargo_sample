@@ -21,6 +21,7 @@
 	route_specification_origin/1,
 	route_specification_destination/1,
 	add/1,
+	assign_to_route/1,
 	all/0]).
 
 -record(route_specification,{
@@ -28,14 +29,22 @@
 	destination = undefined :: undefined |string()
 }).
 
+-record(itinerary,{
+	legs = undefined :: undefined | lest()
+}).
+
 -record(cargo, {
 	id = undefined :: undefined |string(),
 	route_specification = #route_specification{},
+	itinerary = #itinerary{},
 	date_created =undefined :: undefined |tuple()
 }).
 
 -opaque route_specification() :: #route_specification{}.
 -export_type([route_specification/0]).
+
+-opaque itinerary() :: #itinerary{}.
+-export_type([itinerary/0]).
 
 -opaque cargo() :: #cargo{}.
 -export_type([cargo/0]).
@@ -62,6 +71,13 @@ add({Id,Origin,Destination,DateCreated}) ->
 									},
 								date_created=DateCreated
 								}). 
+
+-spec assign_to_route(tuple()) -> ok.
+assign_to_route({Id,Legs}) ->
+	ok=mnesia_utile:store(#cargo{id=Id,
+								itinerary=#itinerary{legs=Legs}
+								}). 
+
 
 %% @doc
 %% load a cargo from read store by id

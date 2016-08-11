@@ -21,6 +21,7 @@
 %% API functions
 -export([start_link/0]).
 -export([create/4]).
+-export([assign_to_route/2]).
 -export([process_unsaved_changes/2]).
 
 %% gen_server callbacks
@@ -53,6 +54,11 @@ start_link() ->
 -spec create(pid(),string(),string(),string()) -> ok.
 create(Pid,Id,Origin,Destination) ->
 	gen_server:cast(get_child_pid(Pid),{create,Id,Origin,Destination}).
+
+%% @doc set itinerary to exitsing cargo
+-spec create(pid(),string(),string(),string()) -> ok.
+assign_to_route(Pid,Id,Legs) ->
+	gen_server:cast(get_child_pid(Pid),{assign_to_route,Id,Legs}).
 
 -spec process_unsaved_changes(pid(),fun()) -> ok.
 process_unsaved_changes(Pid, Saver)->
@@ -88,6 +94,12 @@ handle_call(_Request, _From, State) ->
 handle_cast({create,Id,Origin,Destination},State) ->
 	{noreply,
 	 apply_new_event({cargo_created,Id,Origin,Destination,erlang:localtime()}, 
+	 					State#state{id=Id})
+	};
+% apply event assign_to_route
+handle_cast({assign_to_route,Id,Legs},State) ->
+	{noreply,
+	 apply_new_event({route_assigned_to_cargo,Id,Legs}, 
 	 					State#state{id=Id})
 	};
 % persist changes

@@ -21,7 +21,7 @@
 -define(SERVER, ?MODULE).
 
 % API Function Exports
--export([start_link/0, project_new_cargo/4]).
+-export([start_link/0, project_new_cargo/4,project_route_to_cargo/2]).
 
 %% gen_server Function Exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -39,6 +39,13 @@ start_link() ->
 project_new_cargo(Id,Origin,Destination,DateCreated) ->
 	gen_server:cast(?SERVER, {project_new_cargo, Id,Origin,Destination,DateCreated}).
 
+%% @doc
+%% creates the state of a created cargo as a read projection
+-spec project_route_to_cargo(string(),list())-> ok.
+project_route_to_cargo(Id,Legs) ->
+    gen_server:cast(?SERVER, {project_route_to_cargo, Id,Legs}).
+
+
 %% gen_server Function Definitions
 %% @private
 init(Args) ->
@@ -50,6 +57,10 @@ handle_call(_Request, _From, State) ->
 handle_cast({project_new_cargo, Id,Origin,Destination,DateCreated}, State) ->
 	ok=cargo_read_store:add({Id,Origin,Destination,DateCreated}), 
 	{noreply, State};
+%% @private
+handle_cast({project_route_to_cargo, Id,Legs}, State) ->
+    ok=cargo_read_store:assign_to_route({Id,Legs}), 
+    {noreply, State};
 %% @private
 handle_cast(_Msg, State) ->
     {noreply, State}.

@@ -51,4 +51,9 @@ request_possible_routes_for_cargo(Tracking_Id) ->
 	Destination=cargo_read_store:route_specification_destination(Cargo), 
 	graph_traversal_service:find_shortest_path(Origin, Destination). 
 
+%% @doc assigns legs to a existing cargo
+-spec assign_cargo_to_route(string(),list())-> ok.
+assign_cargo_to_route(Tracking_Id, Legs)->
+	event_manager:send_command({assign_cargo_to_route,Tracking_Id,Legs}). 
+
 
