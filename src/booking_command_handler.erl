@@ -84,6 +84,15 @@ handle_event({assign_route_to_cargo,Id,Legs}, State) ->
     cargo_repository:save(Pid),
     {ok, State};
 
+    case cargo_repository:get_by_id(Id) of
+        not_found ->
+            {ok, State};
+        {ok,Pid} ->
+            counter_aggregate:bump_counter(Pid),
+            counter_repository:save(Pid),
+            {ok, State}
+    end;
+
 
 %% @private
 handle_event(_Event, State) ->

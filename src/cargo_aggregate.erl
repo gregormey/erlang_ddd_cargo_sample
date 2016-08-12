@@ -56,14 +56,17 @@ create(Pid,Id,Origin,Destination) ->
 	gen_server:cast(get_child_pid(Pid),{create,Id,Origin,Destination}).
 
 %% @doc set itinerary to exitsing cargo
--spec create(pid(),string(),string(),string()) -> ok.
-assign_to_route(Pid,Id,Legs) ->
-	gen_server:cast(get_child_pid(Pid),{assign_to_route,Id,Legs}).
+-spec create(pid(),list()) -> ok.
+assign_to_route(Pid,Legs) ->
+	gen_server:cast(get_child_pid(Pid),{assign_to_route,Legs}).
 
 -spec process_unsaved_changes(pid(),fun()) -> ok.
 process_unsaved_changes(Pid, Saver)->
 	gen_server:cast(get_child_pid(Pid),{process_unsaved_changes,Saver}).
 
+-spec load_from_history(pid(),list())
+load_from_history(Pid, Events)-> ok.
+	gen_server:cast(get_child_pid(Pid),{load_from_history,Events}).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -94,13 +97,13 @@ handle_call(_Request, _From, State) ->
 handle_cast({create,Id,Origin,Destination},State) ->
 	{noreply,
 	 apply_new_event({cargo_created,Id,Origin,Destination,erlang:localtime()}, 
-	 					State#state{id=Id})
+	 					State#)
 	};
 % apply event assign_to_route
-handle_cast({assign_to_route,Id,Legs},State) ->
+handle_cast({assign_to_route,Legs},State) ->
 	{noreply,
-	 apply_new_event({route_assigned_to_cargo,Id,Legs}, 
-	 					State#state{id=Id})
+	 apply_new_event({route_assigned_to_cargo,Legs}, 
+	 					State)
 	};
 % persist changes
 handle_cast({process_unsaved_changes, Saver},State) ->
@@ -110,6 +113,12 @@ handle_cast({process_unsaved_changes, Saver},State) ->
 	 State#state{changes=[]}
 	};
 
+% append loaded events 
+handle_cast({load_from_history, Events},State) ->
+	NewState = apply_many_events(Events, #state{}),
+	{noreply,
+	 NewState
+	};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
@@ -141,8 +150,24 @@ code_change(_OldVsn, State, _Extra) ->
 %% cargo aggregate
 -spec apply_new_event(tuple(), state())->state().
 apply_new_event(Event, State) ->
-	CombinedChanges = [Event] ++ State#state.changes,
-	State#state{changes=CombinedChanges}.
+	NewState = apply_event(Event, State),
+	CombinedChanges = [Event] ++ NewState#state.changes,
+	NewState#state{changes=CombinedChanges}.
+
+-spec apply_many_events(list(), state())->state().
+apply_many_events([], State) ->
+	State;
+apply_many_events([Event|Rest], State) ->
+	NewState = apply_event(Event, State),
+	apply_many_events(Rest, NewState).
+
+-spec apply_event(event(), state())->state().
+apply_event({cargo_created,Id,_Origin,_Destination,_Date_created},State)->
+	gproc:reg({n, l, {cargo_aggregate, Id}}),
+	State#state{id=Id}.
+
+apply_event(_Event, State)->
+	State. % For some events, we don't have state to mutate
 %% @doc
 %% finds the pid of a cargo_aggregate process from its supervisor process
 -spec get_child_pid(pid()) -> pid().

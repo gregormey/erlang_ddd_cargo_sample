@@ -24,3 +24,20 @@
 save(Pid) ->
 	Saver = fun(Id, Events) -> event_store:append_events(Id, Events) end,
 	cargo_aggregate:process_unsaved_changes(Pid, Saver).
+
+load_from_event_store(Id) ->
+	case event_store:get_events(Id) of 
+		[] -> 
+			not_found;
+		Events -> 
+			{ok, Pid} = cargo_sup:start_link(),
+			cargo_aggregate:load_from_history(Pid, Events),
+			{ok, Pid}
+	end.
+
+
+get_by_id(Id) ->
+	case gproc:where({n,l, {cargo_aggregate, Id}}) of
+		undefined -> load_from_event_store(Id);
+		Pid -> {ok, Pid}
+	end.

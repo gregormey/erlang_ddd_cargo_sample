@@ -24,6 +24,7 @@
 start(_Type, _Args) -> 
     ok=init_schema(),
 	ensure_started(mnesia),
+    ensure_started(gproc),
 	event_store:init(),
     cargo_read_store:init(),
     case erlang_ddd_cargo_sample_sup:start_link() of
