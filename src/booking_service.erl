@@ -19,7 +19,8 @@
 		load_cargo_for_routing/1,
 		list_all_cargos/0,
 		list_shipping_locations/0,
-		request_possible_routes_for_cargo/1]).
+		request_possible_routes_for_cargo/1,
+		assign_cargo_to_route/2]).
 
 %% @doc sends command to book a new cargo
 -spec book_new_cargo(string(),string(),string())-> ok.

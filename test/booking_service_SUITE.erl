@@ -18,7 +18,12 @@
 -import(ct_helper, [doc/1]).
    
 
-all() -> [book_new_cargo, load_cargo, list_all_cargos, list_shipping_locations].
+all() -> [book_new_cargo, 
+			load_cargo, 
+			list_all_cargos, 
+			list_shipping_locations,
+			assign_cargo_to_route
+		].
 
 init_per_suite(_Config) ->
     [{id,generate_tracking_id()}].
@@ -26,17 +31,17 @@ init_per_suite(_Config) ->
 book_new_cargo(Config)->
 	doc("Add a new cargo."),
 	Id=get_id_from_config(Config),
-	ok=booking_service:book_new_cargo(Id,"Hamburg", "Hong Kong").
+	ok=booking_service:book_new_cargo(Id,"DEHAM", "NLRTM").
 
 load_cargo(Config)->
 	doc("Load a specific cargo."),
 	Id=get_id_from_config(Config),
-	{cargo,Id,_,_}=booking_service:load_cargo_for_routing(Id). 
+	{cargo,Id,_,_,_}=booking_service:load_cargo_for_routing(Id). 
 
 list_all_cargos(Config)->
 	doc("List cargos"),
 	Id=get_id_from_config(Config),
-	[{cargo,Id,_,_}]=booking_service:list_all_cargos().
+	[{cargo,Id,_,_,_}]=booking_service:list_all_cargos().
 
 list_shipping_locations(_Config)->
 	doc("It lists available shipping locations"),
@@ -44,6 +49,19 @@ list_shipping_locations(_Config)->
 	true=is_list(Locations),
 	[{LocationCode,_}|_]=Locations,
 	5=string:len(LocationCode).
+
+assign_cargo_to_route(Config)->
+	doc("Assign diffrent Legs as a route to a cargo."),
+	Id=get_id_from_config(Config),
+	[Legs]=booking_service:request_possible_routes_for_cargo(Id), 
+	ok=booking_service:assign_cargo_to_route(Id,Legs).
+
+check_cargo_itinerary(Config)->
+	doc("Checks if a itinerary is assigned to a cargo."),
+	Id=get_id_from_config(Config),
+	{cargo,Id,_,Itinerary,_}=booking_service:load_cargo_for_routing(Id),
+	[{edge,"DEHAM","NLRTM",{{_,_,_},{_,_,_}},{{_,_,_},{_,_,_}}}]=Itinerary.
+
 
 %%% internal
 get_id_from_config(Config)->

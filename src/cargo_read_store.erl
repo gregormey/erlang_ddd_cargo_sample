@@ -30,7 +30,7 @@
 }).
 
 -record(itinerary,{
-	legs = undefined :: undefined | lest()
+	legs = undefined :: undefined | list()
 }).
 
 -record(cargo, {

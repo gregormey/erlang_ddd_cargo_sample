@@ -17,6 +17,8 @@
 -module(cargo_repository).
 
 -export([save/1]).
+-export([get_by_id/1]).
+
 
 %% @doc
 %% persists events on a aggregate idetified by its process ID
@@ -30,7 +32,8 @@ load_from_event_store(Id) ->
 		[] -> 
 			not_found;
 		Events -> 
-			{ok, Pid} = cargo_sup:start_link(),
+			{ok, SupPid} = cargo_sup:start_link(),
+			Pid=cargo_sup:get_child_pid(SupPid),
 			cargo_aggregate:load_from_history(Pid, Events),
 			{ok, Pid}
 	end.
@@ -41,3 +44,5 @@ get_by_id(Id) ->
 		undefined -> load_from_event_store(Id);
 		Pid -> {ok, Pid}
 	end.
+
+

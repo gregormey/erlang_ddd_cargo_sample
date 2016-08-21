@@ -70,26 +70,25 @@ init([]) ->
 -spec handle_event(term(), state()) -> {ok, state()} | 'remove_handler' | {'ok',_} | {'ok',_,'hibernate'} | {'swap_handler',_,_,atom() | {atom(),_},_}.
 %% @doc handel command to book a new cargo
 handle_event({book_new_cargo,Id,Origin,Destination}, State) ->
-    {ok, Pid} = cargo_sup:start_link(),
-    cargo_aggregate:create(Pid,Id, Origin, Destination), 
-    cargo_repository:save(Pid),
-	{ok, State};
+    case cargo_repository:get_by_id(Id) of
+        not_found ->
+            {ok, SupPid} = cargo_sup:start_link(),
+            Pid=cargo_sup:get_child_pid(SupPid),
+            cargo_aggregate:create(Pid,Id, Origin, Destination), 
+            cargo_repository:save(Pid),
+        	{ok, State};
+        _ ->    
+            {ok, State}
+    end;
 
-%% @private
--spec handle_event(term(), state()) -> {ok, state()} | 'remove_handler' | {'ok',_} | {'ok',_,'hibernate'} | {'swap_handler',_,_,atom() | {atom(),_},_}.
 %% @doc handel command to book a new cargo
 handle_event({assign_route_to_cargo,Id,Legs}, State) ->
-    {ok, Pid} = cargo_sup:start_link(),
-    cargo_aggregate:assign_to_route(Pid,Id,Legs), 
-    cargo_repository:save(Pid),
-    {ok, State};
-
     case cargo_repository:get_by_id(Id) of
         not_found ->
             {ok, State};
         {ok,Pid} ->
-            counter_aggregate:bump_counter(Pid),
-            counter_repository:save(Pid),
+            cargo_aggregate:assign_to_route(Pid,Id,Legs), 
+            cargo_repository:save(Pid),
             {ok, State}
     end;
 

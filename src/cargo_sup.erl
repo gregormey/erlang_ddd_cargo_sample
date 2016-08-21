@@ -17,6 +17,7 @@
 -behaviour(supervisor).
  
 -export([start_link/0]).
+-export([get_child_pid/1]).
 -export([init/1]).
 
 %% API
@@ -24,6 +25,13 @@
 start_link() ->
 	supervisor:start_link(?MODULE,[]).
  
+%% @doc
+%% finds the pid of a cargo_aggregate process from its supervisor process
+-spec get_child_pid(pid()) -> pid().
+get_child_pid(ParentPid) ->
+	[{_,ChildPid,_,_}]=supervisor:which_children(ParentPid),
+	ChildPid.
+
 %% supervisor.
 init(_) ->
 {ok, {{one_for_one, 10, 60},
