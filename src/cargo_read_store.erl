@@ -82,7 +82,7 @@ assign_to_route({Id,Legs}) ->
 
 %% @doc
 %% load a cargo from read store by id
--spec load_by_id(string()) -> tuple() | not_found.
+-spec load_by_id(string()) -> cargo() | not_found.
 load_by_id(Tracking_Id) -> 
 	mnesia_utile:find_by_id(cargo, Tracking_Id).
 

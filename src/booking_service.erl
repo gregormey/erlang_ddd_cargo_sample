@@ -47,10 +47,13 @@ list_shipping_locations() ->
 %% @doc lists all possible routes for a cargo
 -spec request_possible_routes_for_cargo(string()) -> list().
 request_possible_routes_for_cargo(Tracking_Id) ->
-	Cargo=cargo_read_store:load_by_id(Tracking_Id),
-	Origin=cargo_read_store:route_specification_origin(Cargo), 
-	Destination=cargo_read_store:route_specification_destination(Cargo), 
-	graph_traversal_service:find_shortest_path(Origin, Destination). 
+	case cargo_read_store:load_by_id(Tracking_Id) of
+		not_found -> [];
+		Cargo -> Origin=cargo_read_store:route_specification_origin(Cargo), 
+				Destination=cargo_read_store:route_specification_destination(Cargo), 
+				Routes=graph_traversal_service:find_shortest_path(Origin, Destination),
+				Routes
+	end. 
 
 %% @doc assigns legs to a existing cargo
 -spec assign_cargo_to_route(string(),list())-> ok.
