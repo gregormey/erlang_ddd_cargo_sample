@@ -69,7 +69,7 @@ init([]) ->
 %% @private
 -spec handle_event(term(), state()) -> {ok, state()} | 'remove_handler' | {'ok',_} | {'ok',_,'hibernate'} | {'swap_handler',_,_,atom() | {atom(),_},_}.
 %% @doc handel command to book a new cargo
-handle_event({book_new_cargo,Id,Origin,Destination}, State) ->
+handle_event({book_new_cargo,Id,Origin,Destination}, State) -> 
     case cargo_repository:get_by_id(Id) of
         not_found ->
             {ok, SupPid} = cargo_sup:start_link(),
@@ -82,7 +82,7 @@ handle_event({book_new_cargo,Id,Origin,Destination}, State) ->
     end;
 
 %% @doc handel command to book a new cargo
-handle_event({assign_route_to_cargo,Id,Legs}, State) ->
+handle_event({assign_cargo_to_route,Id,Legs}, State) ->
     case cargo_repository:get_by_id(Id) of
         not_found ->
             {ok, State};

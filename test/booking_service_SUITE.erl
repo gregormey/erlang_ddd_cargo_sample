@@ -22,7 +22,8 @@ all() -> [book_new_cargo,
 			load_cargo, 
 			list_all_cargos, 
 			list_shipping_locations,
-			assign_cargo_to_route
+			assign_cargo_to_route,
+			check_cargo_itinerary
 		].
 
 init_per_suite(_Config) ->
@@ -53,14 +54,14 @@ list_shipping_locations(_Config)->
 assign_cargo_to_route(Config)->
 	doc("Assign diffrent Legs as a route to a cargo."),
 	Id=get_id_from_config(Config),
-	[Legs]=booking_service:request_possible_routes_for_cargo(Id), 
+	[Legs]=booking_service:request_possible_routes_for_cargo(Id),
 	ok=booking_service:assign_cargo_to_route(Id,Legs).
 
 check_cargo_itinerary(Config)->
 	doc("Checks if a itinerary is assigned to a cargo."),
 	Id=get_id_from_config(Config),
-	{cargo,Id,_,Itinerary,_}=booking_service:load_cargo_for_routing(Id),
-	[{edge,"DEHAM","NLRTM",{{_,_,_},{_,_,_}},{{_,_,_},{_,_,_}}}]=Itinerary.
+	{cargo,Id,_,{itinerary,Legs},_}=booking_service:load_cargo_for_routing(Id), 
+	[{edge,"DEHAM","NLRTM",{{_,_,_},{_,_,_}},{{_,_,_},{_,_,_}}}]=Legs.
 
 
 %%% internal

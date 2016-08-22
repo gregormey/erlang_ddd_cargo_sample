@@ -21,7 +21,7 @@
 %% API functions
 -export([start_link/0]).
 -export([create/4]).
--export([assign_to_route/2]).
+-export([assign_to_route/3]).
 -export([process_unsaved_changes/2]).
 -export([load_from_history/2]).
 
@@ -57,9 +57,9 @@ create(Pid,Id,Origin,Destination) ->
 	gen_server:cast(Pid,{create,Id,Origin,Destination}).
 
 %% @doc set itinerary to exitsing cargo
--spec assign_to_route(pid(),list()) -> ok.
-assign_to_route(Pid,Legs) ->
-	gen_server:cast(Pid,{assign_to_route,Legs}).
+-spec assign_to_route(pid(),string(),list()) -> ok.
+assign_to_route(Pid,Id,Legs) ->
+	gen_server:cast(Pid,{assign_to_route,Id,Legs}).
 
 -spec process_unsaved_changes(pid(),fun()) -> ok.
 process_unsaved_changes(Pid, Saver)->
@@ -101,9 +101,9 @@ handle_cast({create,Id,Origin,Destination},State) ->
 	 					State)
 	};
 % apply event assign_to_route
-handle_cast({assign_to_route,Legs},State) ->
+handle_cast({assign_to_route,Id,Legs},State) ->
 	{noreply,
-	 apply_new_event({route_assigned_to_cargo,Legs}, 
+	 apply_new_event({route_assigned_to_cargo,Id,Legs}, 
 	 					State)
 	};
 % persist changes

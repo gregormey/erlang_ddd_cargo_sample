@@ -56,4 +56,4 @@ ensure_started(App) ->
 init_schema()->
     case mnesia:create_schema([node()]) of
         _ -> ok
-    end. 
+    end.

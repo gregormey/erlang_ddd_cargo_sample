@@ -74,7 +74,8 @@ add({Id,Origin,Destination,DateCreated}) ->
 
 -spec assign_to_route(tuple()) -> ok.
 assign_to_route({Id,Legs}) ->
-	ok=mnesia_utile:store(#cargo{id=Id,
+	Cargo=load_by_id(Id),
+	ok=mnesia_utile:store(Cargo#cargo{id=Id,
 								itinerary=#itinerary{legs=Legs}
 								}). 
 
