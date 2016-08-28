@@ -1,10 +1,9 @@
-# Project
-PROJECT = erlang_ddd_cargo_sample
-PROJECT_DESCRIPTION = Erlang DDD Cargo Sample 
+PROJECT = cargo_backend
+PROJECT_DESCRIPTION = Cargo Backend for Erlang DDD Cargo Sample
 PROJECT_VERSION = 0.0.1
 
 # Options.
-CT_OPTS += -pa test -ct_hooks erlang_ddd_cargo_sample_ct_hook []
+CT_OPTS += -pa test -ct_hooks cargo_backend_ct_hook []
 
 # Depandancies
 DEPS = uuid gproc mnesia_utile

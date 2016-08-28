@@ -12,9 +12,9 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(erlang_ddd_cargo_sample_ct_hook).
+-module(cargo_backend_ct_hook).
 -export([init/2]).
 init(_, _) ->
 	ok=mnesia:create_schema([node()]),
-    ct_helper:start([erlang_ddd_cargo_sample]),
+    ct_helper:start([cargo_backend]),
     {ok, undefined}.

@@ -11,8 +11,9 @@
 %% %% WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 %% %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 %% %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+%%
 
--module(erlang_ddd_cargo_sample_sup).
+-module(cargo_backend_sup).
 -behaviour(supervisor).
 
 -export([start_link/0]).

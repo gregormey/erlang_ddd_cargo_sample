@@ -13,7 +13,7 @@
 %% %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %%
 
--module(erlang_ddd_cargo_sample_app).
+-module(cargo_backend_app).
 -behaviour(application).
 
 %% API.
@@ -21,13 +21,13 @@
 -export([stop/1]).
 
 %% API.
-start(_Type, _Args) -> 
-    ok=init_schema(),
+start(_Type, _Args) ->
+	ok=init_schema(),
 	ensure_started(mnesia),
     ensure_started(gproc),
 	event_store:init(),
     cargo_read_store:init(),
-    case erlang_ddd_cargo_sample_sup:start_link() of
+    case cargo_backend_sup:start_link() of
         {ok, Pid} ->
             booking_command_handler:add_handler(),
             booking_event_handler:add_handler(),
@@ -38,6 +38,7 @@ start(_Type, _Args) ->
 
 stop(_State) ->
 	ok.
+
 %% @private
 %% @doc
 %% start all required applications
