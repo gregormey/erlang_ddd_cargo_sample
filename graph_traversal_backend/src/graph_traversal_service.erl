@@ -14,7 +14,19 @@
 
 -module(graph_traversal_service).
 
+-behaviour(gen_server).
+
+%% API functions
+-export([start_link/0]).
 -export([find_shortest_path/2]).
+
+%% gen_server callbacks
+-export([init/1,
+         handle_call/3,
+         handle_cast/2,
+         handle_info/2,
+         terminate/2,
+         code_change/3]).
 
 -record(edge, {
 	fromUnLocode = undefined :: undefined |string(),
@@ -36,12 +48,71 @@
 -opaque edge() :: #edge{}.
 -export_type([edge/0]).
 
+%%%===================================================================
+%%% API functions
+%%%===================================================================
 
-%% @doc returms a list of all possible paths for the given locations
+%% @doc Starts the server
+-spec start_link() -> {ok, pid()} | ignore | {error, term()}.
+start_link() ->
+    gen_server:start_link(?MODULE, [], []).
+
+
+
+%% @doc returns a list of all possible paths for the given locations
 -spec find_shortest_path(string(),string())-> list(). 
 find_shortest_path(FromUnLocode,ToUnLocode)->
-	Routes=filter_routes(FromUnLocode,ToUnLocode),
-	[route_to_transit_path(Route) || Route <-Routes ].
+	gen_server:call(?MODULE,{find_shortest_path,FromUnLocode,ToUnLocode}).
+
+%%%===================================================================
+%%% gen_server callbacks
+%%%===================================================================
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Initializes the server
+init([]) ->
+    {ok, ?MODULE}.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Handling call messages
+% returns a list of all possible paths for the given locations
+handle_call({find_shortest_path,FromUnLocode,ToUnLocode}, _From, State) ->
+  Routes=filter_routes(FromUnLocode,ToUnLocode),
+  {reply, 
+	[route_to_transit_path(Route) || Route <-Routes ]
+  ,State};
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Handling call messages
+handle_call(_Request, _From, State) ->
+    {reply, ok, State}.
+
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% @private
+handle_info(timeout, State) ->
+	{stop, timeout, State};
+
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% @private
+terminate(_Reason, _State) ->
+    ok.
+
+%%--------------------------------------------------------------------
+%% @private
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
 
 
 %%%===================================================================

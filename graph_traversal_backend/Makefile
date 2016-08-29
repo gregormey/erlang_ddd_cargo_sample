@@ -1,5 +1,5 @@
 PROJECT = graph_traversal_backend
-PROJECT_DESCRIPTION = New project
+PROJECT_DESCRIPTION = Graph Traversal Backend for Erlang DDD Cargo Sample
 PROJECT_VERSION = 0.0.1
 
 # Options.

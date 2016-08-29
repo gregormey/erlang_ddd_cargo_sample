@@ -8,3 +8,8 @@ relx
 logs
 *.beam
 *.plt
+graph_traversal_backend/_rel/graph_traversal_backend_release/bin
+graph_traversal_backend/_rel/graph_traversal_backend_release/erts-7.2.1/bin
+graph_traversal_backend/_rel/graph_traversal_backend_release/erts-7.2.1/include
+graph_traversal_backend/_rel
+graph_traversal_backend/rel
