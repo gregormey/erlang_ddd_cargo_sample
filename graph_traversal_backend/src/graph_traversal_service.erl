@@ -16,6 +16,8 @@
 
 -behaviour(gen_server).
 
+-define(SERVER, ?MODULE).
+
 %% API functions
 -export([start_link/0]).
 -export([find_shortest_path/2]).
@@ -55,7 +57,7 @@
 %% @doc Starts the server
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
-    gen_server:start_link(?MODULE, [], []).
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 
 
